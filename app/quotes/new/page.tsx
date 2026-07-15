@@ -283,55 +283,63 @@ export default function Home() {
           <p className="text-[12px] text-[#999] mt-2">For same state: CGST + SGST. For interstate: use IGST only (set CGST & SGST to 0).</p>
         </section>
 
-        {/* Product Search */}
-        <section>
-          <h2 className="text-[20px] font-semibold tracking-tight mb-4">Add Products</h2>
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7a7a7a] w-5 h-5" />
+      </div>
+
+      {/* Right Column: Sticky Sidebar */}
+      <div className="w-full md:w-[400px] xl:w-[450px] shrink-0 flex flex-col gap-6 h-fit sticky top-8">
+        
+        {/* 1. Product Search */}
+        <section className="bg-white border border-[#e0e0e0] rounded-[18px] p-6 shadow-sm flex flex-col gap-5 relative z-10">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-[20px] font-semibold tracking-tight">Add Products</h2>
+          </div>
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7a7a7a] w-5 h-5 group-focus-within:text-[#0066cc] transition-colors" />
             <input 
               type="text" 
-              placeholder="Search by description or part number..." 
+              placeholder="Search by description or part no..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#f5f5f7] border border-[#e0e0e0] rounded-[11px] py-3 pl-12 pr-4 text-[15px] outline-none focus:ring-2 focus:ring-[#0066cc]"
+              className="w-full bg-[#f5f5f7] border border-[#e0e0e0] rounded-[12px] py-3.5 pl-12 pr-4 text-[15px] outline-none focus:ring-4 focus:ring-[#0066cc]/10 focus:border-[#0066cc] focus:bg-white transition-all shadow-sm"
             />
           </div>
           
           {searchResults.length > 0 && (
-            <div className="mt-4 bg-white border border-[#e0e0e0] rounded-[11px] overflow-hidden max-h-[300px] overflow-y-auto">
+            <div className="absolute top-[110px] left-0 right-0 mx-6 bg-white border border-[#e0e0e0] rounded-[12px] overflow-hidden max-h-[350px] overflow-y-auto shadow-[0_10px_40px_rgba(0,0,0,0.1)] divide-y divide-[#f0f0f0] z-50">
               {searchResults.map(product => (
-                <div key={product.id} className="flex items-center justify-between p-3 border-b border-[#f0f0f0] last:border-b-0 hover:bg-[#fafafc]">
-                  <div>
-                    <div className="font-semibold text-[15px] tracking-tight">{product.name}</div>
-                    <div className="text-[13px] text-[#7a7a7a]">
-                      {[
-                        product.articleNumber ? `Part No: ${product.articleNumber}` : null,
-                        formatCurrency(product.price)
-                      ].filter(Boolean).join(' | ')}
+                <div key={product.id} className="flex items-center justify-between p-4 hover:bg-[#fafafc] transition-colors group/item cursor-pointer" onClick={() => {
+                  addItem({ productId: product.id, name: product.name, price: product.price, quantity: 1, discount: 0, articleNumber: product.articleNumber });
+                  setSearchQuery('');
+                  setSearchResults([]);
+                }}>
+                  <div className="flex flex-col gap-1">
+                    <div className="font-semibold text-[14px] tracking-tight text-[#111] leading-tight">{product.name}</div>
+                    <div className="text-[13px] text-[#7a7a7a] flex items-center gap-2 mt-1">
+                      {product.articleNumber && (
+                        <span className="inline-flex items-center bg-[#f0f0f0] border border-[#e5e5e5] px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wider text-[#555]">
+                          {product.articleNumber}
+                        </span>
+                      )}
+                      <span className="font-semibold text-[#333]">{formatCurrency(product.price)}</span>
                     </div>
                   </div>
                   <button 
-                    onClick={() => {
-                      addItem({ productId: product.id, name: product.name, price: product.price, quantity: 1, discount: 0, articleNumber: product.articleNumber });
-                      setSearchQuery('');
-                      setSearchResults([]);
-                    }}
-                    className="bg-[#fafafc] border border-[#e0e0e0] rounded-[8px] p-2 hover:bg-[#f0f0f0] transition-colors"
+                    className="flex items-center justify-center shrink-0 w-8 h-8 bg-white border border-[#e0e0e0] rounded-full text-[#0066cc] hover:bg-[#0066cc] hover:text-white hover:border-[#0066cc] transition-all shadow-sm group-hover/item:scale-110 active:scale-95"
+                    title="Add to Quote"
                   >
-                    <Plus className="w-5 h-5 text-[#0066cc]" />
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
               ))}
             </div>
           )}
         </section>
-      </div>
 
-      {/* Right Column: Quote Summary */}
-      <div className="w-full md:w-[400px] xl:w-[450px] shrink-0 bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-6 flex flex-col h-fit sticky top-8">
-        <h2 className="text-[24px] font-semibold tracking-tight mb-6">Quotation Summary</h2>
-        
-        <div className="flex-1 overflow-y-auto min-h-[200px]">
+        {/* 2. Quote Summary */}
+        <div className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-6 flex flex-col">
+          <h2 className="text-[24px] font-semibold tracking-tight mb-6">Quotation Summary</h2>
+          
+          <div className="flex-1 overflow-y-auto max-h-[40vh] min-h-[150px] pr-2 -mr-2">
           {items.length === 0 ? (
             <div className="text-[#7a7a7a] text-center mt-10">No items added yet.</div>
           ) : (
@@ -452,6 +460,7 @@ export default function Home() {
           )}
         </button>
       </div>
+    </div>
     </div>
   );
 }
