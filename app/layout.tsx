@@ -26,7 +26,7 @@ import Header from './components/Header';
 
 export default async function RootLayout({children}: {children: React.ReactNode}) {
   const { data: settings } = await supabase.from('Settings').select('companyName').maybeSingle();
-  const titleText = settings?.companyName ? `${settings.companyName} quotation` : 'QuoteMate';
+  const titleText = settings?.companyName ? `${settings.companyName}` : 'QuoteMate';
 
   const serverSupabase = await createClient();
   const { data: { user } } = await serverSupabase.auth.getUser();

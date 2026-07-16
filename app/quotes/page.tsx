@@ -49,10 +49,10 @@ export default async function QuotesPage() {
           </div>
         ) : (
           quotes.map((quote: any) => (
-            <div key={quote.id} className="relative group">
+              <div key={quote.id} className="relative group">
               <Link 
                 href={`/quotes/${quote.id}`}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-50 transition-all group cursor-pointer"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-50 transition-all group cursor-pointer pr-16 sm:pr-5"
               >
                 <div>
                   <div className="flex items-center gap-3 mb-1">
@@ -67,19 +67,19 @@ export default async function QuotesPage() {
                 </div>
                 
                 <div className="flex items-center justify-between sm:justify-end gap-8 mt-4 sm:mt-0 w-full sm:w-auto">
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold mb-0.5">Total</div>
                     <div className="text-lg font-bold text-slate-900">{formatCurrency(quote.total)}</div>
                   </div>
-                  <div className="flex items-center gap-2 text-indigo-600 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 pr-2">
-                    <span className="text-sm font-semibold">View</span>
+                  <div className="flex items-center gap-2 text-indigo-600 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:translate-x-2 sm:group-hover:translate-x-0 pr-2">
+                    <span className="text-sm font-semibold hidden sm:inline">View</span>
                     <ArrowRight className="w-5 h-5" />
                   </div>
                 </div>
               </Link>
               
               {/* Delete Button floats outside the Link to prevent hydration/nesting errors, positioned absolutely */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-auto sm:left-[calc(100%+16px)] sm:top-1/2 sm:-translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10 hidden sm:block">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-auto sm:left-[calc(100%+16px)] sm:top-1/2 sm:-translate-y-1/2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
                 <DeleteQuoteButton id={quote.id} />
               </div>
             </div>

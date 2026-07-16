@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 
 export default async function Home() {
   const { data: settings } = await supabase.from('Settings').select('companyName').maybeSingle();
-  const titleText = settings?.companyName ? `${settings.companyName} quotation` : 'QuoteMate';
+  const titleText = settings?.companyName ? `${settings.companyName} QUOTATION` : 'QuoteMate';
 
   const serverSupabase = await createClient();
   const { data: { user } } = await serverSupabase.auth.getUser();
