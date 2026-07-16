@@ -40,6 +40,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
                 <Link href="/" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Home</Link>
                 <Link href="/products" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Products</Link>
                 <Link href="/quotes" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Quotations</Link>
+                <Link href="/customers" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Customers</Link>
                 <Link href="/settings" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Settings</Link>
               </nav>
             </div>

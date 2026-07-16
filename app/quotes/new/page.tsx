@@ -8,12 +8,17 @@ import toast from 'react-hot-toast';
 import { formatCurrency } from '@/lib/format';
 
 interface Product { id: string; name: string; articleNumber: string | null; price: number; }
+interface Customer { id: string; name: string; email: string | null; phone: string | null; address: string | null; contactPerson: string | null; }
 
 export default function Home() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const [customerSearchResults, setCustomerSearchResults] = useState<Customer[]>([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const customerInputRef = useRef<HTMLInputElement>(null);
   
   const { 
     customerName, setCustomerName,
@@ -50,6 +55,32 @@ export default function Home() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (customerName.length < 2) {
+      setCustomerSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetch(`/api/customers?q=${encodeURIComponent(customerName)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setCustomerSearchResults(data);
+        })
+        .catch(console.error);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [customerName]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (customerInputRef.current && !customerInputRef.current.contains(event.target as Node)) {
+        setShowCustomerDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Auto-generate quote number on mount if empty
   useEffect(() => {
@@ -142,15 +173,48 @@ export default function Home() {
             Customer Details
           </h2>
           <div className="flex flex-col gap-4">
-            <div className="relative">
+            <div className="relative" ref={customerInputRef}>
               <label className="block text-[13px] text-[#7a7a7a] mb-1 font-medium">Customer Name *</label>
               <input 
                 type="text"
                 placeholder="Type customer name..."
                 className="w-full bg-[#f5f5f7] border border-[#e0e0e0] rounded-[11px] p-3 text-[15px] outline-none focus:ring-2 focus:ring-[#0066cc]"
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  setShowCustomerDropdown(true);
+                }}
+                onFocus={() => setShowCustomerDropdown(true)}
               />
+              
+              {showCustomerDropdown && customerSearchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e0e0e0] rounded-[12px] overflow-hidden max-h-[250px] overflow-y-auto shadow-[0_10px_40px_rgba(0,0,0,0.1)] divide-y divide-[#f0f0f0] z-50">
+                  {customerSearchResults.map(customer => (
+                    <div 
+                      key={customer.id} 
+                      className="flex items-center justify-between p-3 hover:bg-[#fafafc] transition-colors cursor-pointer"
+                      onClick={() => {
+                        setCustomerName(customer.name);
+                        setCustomerEmail(customer.email || '');
+                        setCustomerPhone(customer.phone || '');
+                        setCustomerAddress(customer.address || '');
+                        if (customer.contactPerson) setContactPerson(customer.contactPerson);
+                        setShowCustomerDropdown(false);
+                      }}
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <div className="font-semibold text-[14px] text-[#111]">{customer.name}</div>
+                        {(customer.email || customer.phone || customer.contactPerson) && (
+                          <div className="text-[12px] text-[#7a7a7a]">
+                            {[customer.email, customer.phone, customer.contactPerson ? `Attn: ${customer.contactPerson}` : null].filter(Boolean).join(' • ')}
+                          </div>
+                        )}
+                      </div>
+                      <Plus className="w-4 h-4 text-[#0066cc]" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
