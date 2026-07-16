@@ -1,11 +1,19 @@
 import Link from 'next/link';
 import { Plus, PackageSearch, FileText } from 'lucide-react';
-
+import { createClient } from '@/lib/supabase/server';
 import { supabase } from '@/lib/supabase';
 
 export default async function Home() {
   const { data: settings } = await supabase.from('Settings').select('companyName').maybeSingle();
   const titleText = settings?.companyName ? `${settings.companyName} quotation` : 'QuoteMate';
+
+  const serverSupabase = await createClient();
+  const { data: { user } } = await serverSupabase.auth.getUser();
+  let isAdmin = false;
+  if (user) {
+    const { data: appUser } = await supabase.from('AppUser').select('role').eq('email', user.email).maybeSingle();
+    isAdmin = appUser?.role === 'admin';
+  }
 
   return (
     <div className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-[calc(100vh-44px)] pb-32">
@@ -18,7 +26,7 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-[1000px]">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${isAdmin ? 'lg:grid-cols-3' : 'max-w-[700px]'} gap-6 w-full max-w-[1000px]`}>
         {/* New Quote */}
         <Link href="/quotes/new" className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-8 flex flex-col items-center justify-center text-center hover:shadow-[0_5px_30px_rgba(0,0,0,0.05)] transition group">
           <div className="w-16 h-16 bg-[#0066cc] rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
@@ -29,13 +37,15 @@ export default async function Home() {
         </Link>
 
         {/* Products */}
-        <Link href="/products" className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-8 flex flex-col items-center justify-center text-center hover:shadow-[0_5px_30px_rgba(0,0,0,0.05)] transition group">
-          <div className="w-16 h-16 bg-white border border-[#e0e0e0] rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-            <PackageSearch className="w-8 h-8 text-[#1d1d1f]" />
-          </div>
-          <h2 className="text-[21px] font-semibold tracking-[0.231px] mb-2 text-[#1d1d1f]">Products</h2>
-          <p className="text-[14px] text-[#7a7a7a]">Manage price lists</p>
-        </Link>
+        {isAdmin && (
+          <Link href="/products" className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-8 flex flex-col items-center justify-center text-center hover:shadow-[0_5px_30px_rgba(0,0,0,0.05)] transition group">
+            <div className="w-16 h-16 bg-white border border-[#e0e0e0] rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+              <PackageSearch className="w-8 h-8 text-[#1d1d1f]" />
+            </div>
+            <h2 className="text-[21px] font-semibold tracking-[0.231px] mb-2 text-[#1d1d1f]">Products</h2>
+            <p className="text-[14px] text-[#7a7a7a]">Manage price lists</p>
+          </Link>
+        )}
 
         {/* History */}
         <Link href="/quotes" className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[18px] p-8 flex flex-col items-center justify-center text-center hover:shadow-[0_5px_30px_rgba(0,0,0,0.05)] transition group">

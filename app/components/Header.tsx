@@ -4,13 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SignOutButton from './SignOutButton';
 
-export default function Header({ titleText }: { titleText: string }) {
+export default function Header({ titleText, isAdmin }: { titleText: string, isAdmin?: boolean }) {
   const pathname = usePathname();
 
-  // Hide the header on the login page
-  if (pathname === '/login') {
+  // Hide the header on the login and unauthorized pages
+  if (pathname === '/login' || pathname === '/unauthorized') {
     return null;
   }
+
+  const getLinkClass = (path: string) => {
+    const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
+    return `transition-colors whitespace-nowrap ${isActive ? 'text-indigo-600 font-semibold' : 'hover:text-indigo-600'}`;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 border-b border-slate-200/50 supports-[backdrop-filter]:bg-white/60">
@@ -20,11 +25,16 @@ export default function Header({ titleText }: { titleText: string }) {
             <Link href="/">{titleText}</Link>
           </div>
           <nav className="flex overflow-x-auto w-full sm:w-auto px-4 sm:px-0 hide-scrollbar justify-start sm:justify-center items-center gap-5 sm:gap-6 text-sm font-medium text-slate-600 pb-1 sm:pb-0">
-            <Link href="/" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Home</Link>
-            <Link href="/products" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Products</Link>
-            <Link href="/quotes" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Quotations</Link>
-            <Link href="/customers" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Customers</Link>
-            <Link href="/settings" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Settings</Link>
+            <Link href="/" className={getLinkClass('/')}>Home</Link>
+            <Link href="/quotes" className={getLinkClass('/quotes')}>Quotations</Link>
+            <Link href="/customers" className={getLinkClass('/customers')}>Customers</Link>
+            <Link href="/settings" className={getLinkClass('/settings')}>Settings</Link>
+            {isAdmin && (
+              <>
+                <Link href="/products" className={getLinkClass('/products')}>Products</Link>
+                <Link href="/users" className={getLinkClass('/users')}>Users</Link>
+              </>
+            )}
             <div className="w-px h-5 bg-slate-200 hidden sm:block mx-1"></div>
             <SignOutButton />
           </nav>

@@ -33,7 +33,8 @@ export async function updateSession(request: NextRequest) {
 
   // Define public routes
   const isPublicRoute = request.nextUrl.pathname.startsWith('/login') || 
-                        request.nextUrl.pathname.startsWith('/auth/callback')
+                        request.nextUrl.pathname.startsWith('/auth/callback') ||
+                        request.nextUrl.pathname.startsWith('/unauthorized')
 
   // If user is not signed in and the current path is not a public route
   // redirect the user to the /login page
@@ -43,11 +44,41 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user IS signed in and trying to access /login, redirect to dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    return NextResponse.redirect(url)
+  // If user IS signed in, check if they exist in the AppUser table
+  if (user) {
+    const { data: appUser } = await supabase
+      .from('AppUser')
+      .select('role')
+      .eq('email', user.email)
+      .maybeSingle()
+
+    const isUnauthorizedRoute = request.nextUrl.pathname.startsWith('/unauthorized')
+    const isLoginRoute = request.nextUrl.pathname.startsWith('/login')
+    const isCallbackRoute = request.nextUrl.pathname.startsWith('/auth/callback')
+
+    if (!appUser) {
+      // User logged in via Google but is not in our AppUser table
+      if (!isUnauthorizedRoute && !isCallbackRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/unauthorized'
+        return NextResponse.redirect(url)
+      }
+    } else {
+      // User is authorized
+      // If trying to access login or unauthorized, redirect to dashboard
+      if (isLoginRoute || isUnauthorizedRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
+
+      // If they are trying to access /users or /products but are not an admin, redirect to home
+      if ((request.nextUrl.pathname.startsWith('/users') || request.nextUrl.pathname.startsWith('/products')) && appUser.role !== 'admin') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
   return supabaseResponse
