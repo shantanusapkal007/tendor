@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Download, Printer, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
 import { DeleteQuoteButton } from '../DeleteQuoteButton';
@@ -45,21 +45,14 @@ export default async function QuotePage({
               <h1 className="text-[28px] sm:text-[34px] font-semibold tracking-tight leading-tight mb-1">Quote {quote.quoteNumber}</h1>
               <p className="text-[#7a7a7a]">{new Date(quote.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-none flex justify-center">
-                <DeleteQuoteButton id={quote.id} redirect={true} />
-              </div>
-              <button 
-                className="flex-1 sm:flex-none justify-center bg-white border border-[#e0e0e0] text-slate-700 rounded-full py-2 px-4 text-[14px] font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
-              >
-                <Printer className="w-4 h-4" />
-                Print
-              </button>
+            
+            <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+              <DeleteQuoteButton id={quote.id} redirect={true} />
               <a 
                 href={`/api/quotations/${quote.id}/pdf`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-[2] sm:flex-none justify-center bg-[#0066cc] text-white rounded-full py-2 px-4 text-[14px] font-semibold hover:bg-[#0071e3] transition-all flex items-center gap-2 shadow-[0_4px_14px_0_rgba(0,102,204,0.39)] hover:shadow-[0_6px_20px_rgba(0,102,204,0.23)]"
+                className="w-full sm:w-auto justify-center bg-[#0066cc] text-white rounded-full py-2.5 px-6 text-[14px] font-semibold hover:bg-[#0071e3] transition-all flex items-center gap-2 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,102,204,0.39)] hover:shadow-[0_6px_20px_rgba(0,102,204,0.23)]"
               >
                 <Download className="w-4 h-4" />
                 Download PDF
