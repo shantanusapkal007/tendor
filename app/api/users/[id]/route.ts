@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { createClient } from '@/lib/supabase/server';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const serverSupabase = await createClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
 
@@ -22,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { data, error } = await supabase
       .from('AppUser')
       .update({ name, email, role })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -33,8 +34,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const serverSupabase = await createClient();
     const { data: { user } } = await serverSupabase.auth.getUser();
 
@@ -50,7 +52,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const { error } = await supabase
       .from('AppUser')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw error;
     return NextResponse.json({ success: true });
