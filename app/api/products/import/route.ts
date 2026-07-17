@@ -203,24 +203,49 @@ export async function POST(request: Request) {
       for (const line of lines) {
         if (!foundHeader) {
           const lower = line.toLowerCase();
-          if (lower.includes('item name') || (lower.includes('sr. no') && lower.includes('price'))) {
+          if (
+            lower.includes('item name') || 
+            (lower.includes('sr. no') && lower.includes('price')) ||
+            (lower.includes('description') && lower.includes('cat.no'))
+          ) {
             foundHeader = true;
           }
           continue;
         }
         
-        // Match format: 1 2345 lorem 1 ₹8,000
-        const match = line.match(/^(\d+)\s+(\S+)\s+(.+?)\s+(?:₹|Rs\.?)?\s*([\d,.]+)$/i);
-        if (match) {
-          const artNo = match[2];
-          const itemName = match[3];
-          const priceStr = match[4].replace(/,/g, '');
+        // Match format 1: 1 2345 lorem 1 ₹8,000 (Sr. No., Part No., Description, Price)
+        const match1 = line.match(/^(\d+)\s+(\S+)\s+(.+?)\s+(?:₹|Rs\.?)?\s*([\d,.]+)$/i);
+        // Match format 2: AX 11-CF Ø 6.0 mm 1 B 482.75436 n 17,983.00 (Description, Grade, Cat No, Optional currency/text, Price)
+        const match2 = line.match(/^(.+?)\s+(\S+)\s+(\S+)\s+(?:[a-zA-Z]+\s+)?([\d,.]+)$/i);
+        
+        if (match1) {
+          const artNo = match1[2];
+          const itemName = match1[3];
+          const priceStr = match1[4].replace(/,/g, '');
           const price = parseFloat(priceStr);
           
           if (itemName && !isNaN(price) && price > 0) {
             validItems.push({
               name: itemName.trim(),
               articleNumber: artNo.trim(),
+              sku: null,
+              description: null,
+              price: price
+            });
+          } else {
+            skipped++;
+          }
+        } else if (match2) {
+          const descPart = match2[1].trim();
+          const grade = match2[2].trim();
+          const catNo = match2[3].trim();
+          const priceStr = match2[4].replace(/,/g, '');
+          const price = parseFloat(priceStr);
+          
+          if (descPart && !isNaN(price) && price > 0) {
+            validItems.push({
+              name: `${descPart} ${grade}`, // Combine description and grade
+              articleNumber: catNo,
               sku: null,
               description: null,
               price: price
@@ -249,8 +274,7 @@ export async function POST(request: Request) {
       skipped = processed.skipped;
     }
 
-    // Since the price list changes WRT years, we replace the entire price list
-    await supabase.from('Product').delete().not('id', 'is', null);
+    // Products will now be appended. Users can use the 'Delete All' button in the UI if they want to wipe the list before importing.
 
     // Insert in batches of 1000
     const BATCH_SIZE = 1000;
