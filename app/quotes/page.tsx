@@ -4,6 +4,7 @@ import { FileText, ArrowRight, Plus } from 'lucide-react';
 import { DeleteQuoteButton } from './DeleteQuoteButton';
 import { DeleteAllQuotesButton } from './DeleteAllQuotesButton';
 import { formatCurrency } from '@/lib/format';
+import { sortQuotesLatestFirst } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +12,12 @@ export default async function QuotesPage() {
   const { data } = await supabase
     .from('Quote')
     .select('*, Customer(*), items:QuoteItem(*)')
-    .order('createdAt', { ascending: false });
+    .order('createdAt', { ascending: false })
+    .order('updatedAt', { ascending: false });
 
   const quotesRaw = data || [];
-  const quotes = quotesRaw.map(q => ({
+  const sortedQuotes = sortQuotesLatestFirst(quotesRaw);
+  const quotes = sortedQuotes.map(q => ({
     ...q,
     customerName: q.Customer?.name,
   }));

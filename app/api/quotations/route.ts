@@ -1,17 +1,21 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sortQuotesLatestFirst } from '@/lib/utils';
 
 export async function GET() {
   try {
     const { data: quotes, error } = await supabase
       .from('Quote')
       .select('*, Customer(*), items:QuoteItem(*)')
-      .order('createdAt', { ascending: false });
+      .order('createdAt', { ascending: false })
+      .order('updatedAt', { ascending: false });
       
     if (error) throw error;
 
+    const sortedQuotes = sortQuotesLatestFirst(quotes || []);
+
     // Map Customer fields back to the quote object for the UI
-    const mappedQuotes = quotes.map(q => ({
+    const mappedQuotes = sortedQuotes.map(q => ({
       ...q,
       customerName: q.Customer?.name,
       customerEmail: q.Customer?.email,
@@ -84,6 +88,14 @@ export async function POST(request: Request) {
       customerId = newCustomer.id;
     }
 
+    let createdAt: string | undefined = undefined;
+    if (data.quoteDate) {
+      const now = new Date();
+      const selected = new Date(data.quoteDate);
+      selected.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      createdAt = selected.toISOString();
+    }
+
     // Create quote
     const { data: quote, error: quoteError } = await supabase
       .from('Quote')
@@ -98,7 +110,7 @@ export async function POST(request: Request) {
         cgst: data.cgst ?? 9,
         sgst: data.sgst ?? 9,
         igst: data.igst ?? 0,
-        createdAt: data.quoteDate ? new Date(data.quoteDate).toISOString() : undefined,
+        createdAt: createdAt,
       })
       .select()
       .single();
