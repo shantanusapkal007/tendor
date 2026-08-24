@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     let query = supabase.from('Product').select('*', { count: 'exact' });
     
     if (search) {
-      query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,itemNumber.ilike.%${search}%`);
+      query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,itemNumber.ilike.%${search}%,make.ilike.%${search}%,drawingNumber.ilike.%${search}%`);
     }
 
     const { data: products, count: totalCount, error } = await query
