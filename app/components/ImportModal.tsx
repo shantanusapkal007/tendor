@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, ChevronDown, Loader2, FileText, CheckCircle2 } from 'lucide-react';
+import { Upload, X, ChevronDown, Loader2, FileText, CheckCircle2, Download, FileSpreadsheet } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface ImportModalProps {
@@ -91,6 +91,28 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
         <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Import Data</h2>
         
         <div className="space-y-6">
+
+          {/* Sample Template Download Card */}
+          <div className="flex items-center justify-between p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-white text-indigo-600 flex items-center justify-center shrink-0 shadow-sm border border-indigo-100">
+                <FileSpreadsheet className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-800">Sample Excel Template</p>
+                <p className="text-[11px] text-gray-500">Download formatted Excel file for product import</p>
+              </div>
+            </div>
+            <a
+              href="/sample-product-template.xlsx"
+              download="sample-product-template.xlsx"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-white hover:bg-indigo-50/80 border border-indigo-200 px-3 py-1.5 rounded-lg shadow-sm transition-all shrink-0 active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download
+            </a>
+          </div>
+
           
           {/* Select Make Dropdown */}
           <div className="flex flex-col gap-2">
