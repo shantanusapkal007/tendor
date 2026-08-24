@@ -344,7 +344,7 @@ export default function Home() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7a7a7a] w-5 h-5 group-focus-within:text-[#0066cc] transition-colors" />
             <input 
               type="text" 
-              placeholder="Search by description or item no..." 
+              placeholder="Search by description, item no, make, or drg no..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#f5f5f7] border border-[#e0e0e0] rounded-[12px] py-3.5 pl-12 pr-4 text-[15px] outline-none focus:ring-4 focus:ring-[#0066cc]/10 focus:border-[#0066cc] focus:bg-white transition-all shadow-sm"
@@ -361,10 +361,20 @@ export default function Home() {
                 }}>
                   <div className="flex flex-col gap-1">
                     <div className="font-semibold text-[14px] tracking-tight text-[#111] leading-tight">{product.name}</div>
-                    <div className="text-[13px] text-[#7a7a7a] flex items-center gap-2 mt-1">
+                    <div className="text-[13px] text-[#7a7a7a] flex items-center gap-2 mt-1 flex-wrap">
+                      {product.make && (
+                        <span className="inline-flex items-center bg-indigo-50 border border-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wider uppercase">
+                          {product.make}
+                        </span>
+                      )}
                       {product.itemNumber && (
                         <span className="inline-flex items-center bg-[#f0f0f0] border border-[#e5e5e5] px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wider text-[#555]">
                           {product.itemNumber}
+                        </span>
+                      )}
+                      {product.drawingNumber && (
+                        <span className="inline-flex items-center bg-blue-50 border border-blue-100 text-blue-700 px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wider">
+                          DRG: {product.drawingNumber}
                         </span>
                       )}
                       <span className="font-semibold text-[#333]">{formatCurrency(product.price)}</span>
