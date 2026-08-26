@@ -40,10 +40,11 @@ export function DeleteQuoteButton({ id, redirect = false }: { id: string; redire
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+      className="p-2.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all active:scale-95 disabled:opacity-50 border border-transparent hover:border-red-100 flex items-center justify-center shrink-0"
       aria-label="Delete quote"
+      title="Delete Quote"
     >
-      <Trash2 className="w-5 h-5" />
+      <Trash2 className="w-4 h-4" />
     </button>
   );
 }
