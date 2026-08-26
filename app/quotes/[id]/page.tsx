@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency } from '@/lib/format';
 import { DeleteQuoteButton } from '../DeleteQuoteButton';
@@ -41,15 +41,26 @@ export default async function QuotePage({
       </Link>
       
       <div className="bg-white border border-[#e0e0e0] rounded-[18px] p-5 sm:p-8 shadow-[0_5px_30px_rgba(0,0,0,0.05)]">
-          <div className="flex flex-col sm:flex-row justify-between items-start mb-8 sm:mb-10 gap-6 sm:gap-0">
-            <div className="w-full break-words">
-              <h1 className="text-[28px] sm:text-[34px] font-semibold tracking-tight leading-tight mb-1">Quote {quote.quoteNumber}</h1>
-              <p className="text-[#7a7a7a]">{new Date(quote.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-10 gap-4 sm:gap-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[28px] sm:text-[34px] font-semibold tracking-tight leading-tight mb-1 text-slate-900">
+                Quote {quote.quoteNumber}
+              </h1>
+              <p className="text-[#7a7a7a] text-[14px]">
+                {new Date(quote.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </p>
             </div>
             
-            <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-              <DeleteQuoteButton id={quote.id} redirect={true} />
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+              <Link
+                href={`/quotes/${quote.id}/edit`}
+                className="bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#ebebee] border border-[#e0e0e0] rounded-full py-2.5 px-5 text-[14px] font-semibold flex items-center gap-2 whitespace-nowrap transition-all active:scale-95 shadow-sm"
+              >
+                <Pencil className="w-4 h-4 text-[#0066cc]" />
+                Edit
+              </Link>
               <DownloadQuoteButton id={quote.id} quoteNumber={quote.quoteNumber} />
+              <DeleteQuoteButton id={quote.id} redirect={true} />
             </div>
           </div>
           
