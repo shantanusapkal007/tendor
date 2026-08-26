@@ -305,15 +305,98 @@ export async function GET(
 
       // Left Content
       const leftPad = MARGIN_LEFT + 5;
-      page.drawText("TO,", { x: leftPad, y: y - 12, size: 9, font: font });
-      page.drawText(quote.customerName || '', { x: leftPad, y: y - 26, size: 10, font: boldFont });
+      page.drawText("TO,", { x: leftPad, y: y - 11, size: 9, font: font });
+      page.drawText(quote.customerName || '', { x: leftPad, y: y - 23, size: 9.5, font: boldFont });
 
-      let addrLines = (quote.customerAddress || "").split('\n');
-      let addrY = y - 38;
-      for (const line of addrLines) {
-        if (addrY < y - 60) break;
-        page.drawText(line.substring(0, 60), { x: leftPad, y: addrY, size: 9, font: font });
-        addrY -= 12;
+      // Format customer address into up to 3 lines with standard font size (size 9)
+      const maxAddrWidth = leftWidth - 10;
+      const getAddressLines = (raw: string, maxLines = 3): string[] => {
+        if (!raw) return [];
+        const rawTrimmed = raw.trim();
+
+        // 1. If user provided explicit newlines in DB
+        if (rawTrimmed.includes('\n')) {
+          const rawLines = rawTrimmed.split('\n').map(s => s.trim()).filter(Boolean);
+          if (rawLines.length <= maxLines) {
+            return rawLines;
+          }
+          // If more than 3 lines in DB (e.g. 4 lines), keep first 2 and combine the remaining into line 3
+          const result = rawLines.slice(0, maxLines - 1);
+          const remaining = rawLines.slice(maxLines - 1).join(' ');
+          result.push(remaining);
+          return result;
+        }
+
+        // 2. If it's comma-separated, split into balanced lines
+        const commaParts = rawTrimmed.split(',').map(s => s.trim()).filter(Boolean);
+        if (commaParts.length >= 3) {
+          const lines: string[] = [];
+          let currentLine = '';
+          const targetPartCount = Math.ceil(commaParts.length / maxLines);
+          let partsInCurrent = 0;
+
+          for (let i = 0; i < commaParts.length; i++) {
+            const part = commaParts[i];
+            const isLast = i === commaParts.length - 1;
+            const partWithComma = isLast ? part : `${part},`;
+            const testLine = currentLine ? `${currentLine} ${partWithComma}` : partWithComma;
+
+            if (
+              (lines.length < maxLines - 1 && (partsInCurrent >= targetPartCount || font.widthOfTextAtSize(testLine, 9) > maxAddrWidth * 0.7)) ||
+              font.widthOfTextAtSize(testLine, 9) > maxAddrWidth
+            ) {
+              if (currentLine) {
+                lines.push(currentLine);
+                currentLine = partWithComma;
+                partsInCurrent = 1;
+              } else {
+                lines.push(testLine);
+                currentLine = '';
+                partsInCurrent = 0;
+              }
+            } else {
+              currentLine = testLine;
+              partsInCurrent++;
+            }
+          }
+          if (currentLine) {
+            lines.push(currentLine);
+          }
+          if (lines.length > maxLines) {
+            const trimmedLines = lines.slice(0, maxLines - 1);
+            trimmedLines.push(lines.slice(maxLines - 1).join(' '));
+            return trimmedLines;
+          }
+          return lines;
+        }
+
+        // 3. Fallback word-wrap
+        const words = rawTrimmed.split(/\s+/);
+        const lines: string[] = [];
+        let curLine = '';
+        for (const word of words) {
+          const testLine = curLine ? `${curLine} ${word}` : word;
+          if (font.widthOfTextAtSize(testLine, 9) <= maxAddrWidth) {
+            curLine = testLine;
+          } else {
+            if (curLine) lines.push(curLine);
+            curLine = word;
+          }
+        }
+        if (curLine) lines.push(curLine);
+        if (lines.length > maxLines) {
+          const trimmedLines = lines.slice(0, maxLines - 1);
+          trimmedLines.push(lines.slice(maxLines - 1).join(' '));
+          return trimmedLines;
+        }
+        return lines;
+      };
+
+      const customerAddrLines = getAddressLines(quote.customerAddress || '', 3);
+      let addrY = y - 35;
+      for (const line of customerAddrLines) {
+        page.drawText(line, { x: leftPad, y: addrY, size: 9, font: font });
+        addrY -= 11;
       }
 
       // Right Content
